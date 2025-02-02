@@ -54,16 +54,19 @@ def list_options(a_list, opt_line_break):
         str_output += str(i) + opt_line_break
     return str_output
 
-def get_options(chosen_col):
+# Gets the values for filtering
+def get_vals(chosen_col):
+    # Get only unique vals with a set()
     val_options = set()
     for i in json_data:
         val_options.add(i[f"{chosen_col}"])
+    # Convert to list and make them neatly alphabetical
     val_options_list = sorted(list(val_options))
     return val_options_list
 
 ### MAIN FUNCTIONS ###
 
-# LAUNCH FUNCTION; INVITES TE USER TO CHOOSE A COLUMN
+# LAUNCH FUNCTION; INVITES THE USER TO CHOOSE A COLUMN
 def launch_and_choose_col():
 # Get string list of columns
     list_cols = list_options(cols, "")
@@ -71,7 +74,7 @@ def launch_and_choose_col():
     col_choice = input(f"{list_cols}\nPlease choose the column you wish to filter by.\n(Case-sensitive; copy & paste recommended): ")
     if col_choice in list_cols:
 # If successful, move on to values section
-        val_options = get_options(col_choice)
+        val_options = get_vals(col_choice)
         choose_value(col_choice, val_options)
     else:
 # Otherwise, if the column is not recognised, say so and restart fucntion with recursion
