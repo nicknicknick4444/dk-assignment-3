@@ -2,11 +2,11 @@
 import requests, json, csv, datetime, sys, json
 import pandas as pd
 
-url_str = "https://d2hmvvndovjpc2.cloudfront.net/efe"
-# accepted_chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-"
-
 ### IMPORT MY HELPER FUNCTIONS ###
 import helper_funcs
+
+# The string for putting the URL together later
+url_str = "https://d2hmvvndovjpc2.cloudfront.net/efe"
 
 ### SUPPORTING FUNCTIONS ###
 
