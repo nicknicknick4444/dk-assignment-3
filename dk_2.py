@@ -3,22 +3,10 @@ import requests, json, csv, datetime, sys, json
 import pandas as pd
 
 url_str = "https://d2hmvvndovjpc2.cloudfront.net/efe"
-accepted_chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-"
+# accepted_chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-"
 
-### HELPER FUNCTIONS ###
-def add_to_dict(item, key, val):
-    item[key] = val
-    # Returns 'None' by default, so return the updated dict myself!
-    return item
-
-# Replaces any forbidden characters for the benefit of the filename
-def cleanup_name(val_choice):
-    new_str = ""
-    for i in val_choice:
-        if i not in accepted_chars:
-            new_str += "_"
-        else: new_str += i
-    return new_str# Replaces any forbidden characters for the benefit of the filename
+### IMPORT MY HELPER FUNCTIONS ###
+import helper_funcs
 
 ### SUPPORTING FUNCTIONS ###
 
@@ -30,7 +18,7 @@ def get_data():
     # Stripping out those 4 empty cols at the end with a dictionary comprehension
     json_data = [{n:i[n] for n in i if "Unnamed:" not in n} for i in json_data]
     # Adding the url col, so that it's available for filtering!     
-    json_data = [add_to_dict(i, "url", url_str + i["filepath"] + i["filename"]) for i in json_data]
+    json_data = [helper_funcs.add_urls(i, "url", url_str + i["filepath"] + i["filename"]) for i in json_data]
     # Convert any None and int OR float types (Mac and Windows interpreted them differently) /
     # to stings for the purposes of analysis
     json_data = [{n:int(round(i[n], 0)) if isinstance(i[n], (float, int)) else i[n] for n in i} for i in json_data]
@@ -91,7 +79,7 @@ def choose_value(col_choice, val_options):
 #     Check if the user's input is one of the available values
     if val_choice in options:
 #         If so, format the filename and move on to output function
-        filename = cleanup_name(val_choice) + "__AND__" + col_choice
+        filename = helper_funcs.cleanup_name(val_choice) + "__AND__" + col_choice
         make_output(col_choice, val_choice, filename)
 #         Invite the user to have another go! Accepts 'y' or 'yes', in any case; \
 #         anything else is taken as a 'no'
@@ -112,11 +100,9 @@ def choose_value(col_choice, val_options):
 def make_output(col_choice, val_choice, filename):
 #     IMPORTANT: THIS IS THE LINE THAT DOES THE ACTUAL FILTERING, VIA A HANDY LIST COMPREHENSION!
     filtered_data = [i for i in json_data if i[f"{col_choice}"] == f"{val_choice}"]
-    
 #     Convert our "None" and "int" value strings back to their correct data-types for the JSON file
     filtered_data = [{n:int(i[n]) if i[n].isnumeric() else i[n] for n in i} for i in filtered_data]
     filtered_data = [{n:None if i[n] == "None" else i[n] for n in i} for i in filtered_data]
-    
 #     Deal with plural issue in row counting/ filename    
     extra_s = "S" if len(filtered_data) > 1 or len(filtered_data) == 0 else ""
     zero_message = "\nIs this what you expected? You maybe have used a subset of a larger existing value." if len(filtered_data) == 0 else ""
@@ -127,7 +113,6 @@ def make_output(col_choice, val_choice, filename):
     # Write the JSON file
     with open (f"Output/{filename}", "w") as file:
         json.dump(filtered_data, file)
-
 
 ### RUN THE PROGRAM HERE ###
 # Runs inside try/ except structure to catch errors
